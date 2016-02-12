@@ -9,4 +9,4 @@ The (stupid) process often goes something like this:
 - Manually copy over all files from it, to the destination share on the Test/Prod server.
 - Hope you didn't make any mistake in any of the above...
 
-Yes, we should all work with CI, Github deploy on Azure etc. etc., but sometimes that's not immediately possible - and this is where the "DeployMe" script templates comes in handy.
+Yes, we should all work with CI etc., but sometimes that's not immediately possible - and this is where the "DeployMe" script templates comes in handy.
