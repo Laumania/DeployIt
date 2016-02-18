@@ -1,22 +1,74 @@
-$SourceDir 			= "SampleSource"
-$DestinationDir		= "C:\SampleDestination"
-$BackupFolderName	= "Backup"
-$BackupDir			= "$DestinationDir\$BackupFolderName"
+#----------------------------------------------------------------------------- 
+# Modified version of: http://vamsi-sharepointhandbook.blogspot.dk/2014/08/powershell-script-copy-files-from.html
+#-----------------------------------------------------------------------------
 
-Write-Output "Start deployment from '$SourceDir' --> '$DestinationDir'"
+Param([Parameter(Mandatory=$true)] 
+      [String] 
+      $DestinationLocation,
+      [Parameter(Mandatory=$true)] 
+      [String] 
+      $BackupLocation
+)
 
+function Get-ScriptDirectory
+{
+ $Invocation = (Get-Variable MyInvocation -Scope 1).Value
+ Split-Path $Invocation.MyCommand.Path
+}
 
-#Backup files in destination directory
-Write-Output "Backup file from $DestinationDir\* --> $BackupDir"
+$currentPhysicalPath = Get-ScriptDirectory
 
-Get-Childitem $DestinationDir\* -recurse -exclude $BackupFolderName | %{
-				Write-Output "Backup file $_ ->> $BackupDir\"
-                Copy-Item -Path $_ -Destination $BackupDir\}
+$logfile=$currentPhysicalPath + "\deployIt.log"
 
-#Copy-Item $DestinationDir\* $BackupDir -exclude $BackupFolderName -recurse
+Start-Transcript $logfile
 
-#Remove all files from destination
-Remove-Item $DestinationDir\* -exclude $BackupFolderName -recurse
+if ((Test-Path $BackupLocation) -ne $True)
+{ 
+    New-Item $BackupLocation -type directory 
+    write-host "Successfully created folder - $BackupLocation" -ForegroundColor Green
+}
+else
+{
+    write-host "Folder already exits - $BackupLocation" -ForegroundColor Blue
+}
 
-#Copy all files from source
-Copy-Item $SourceDir\* $DestinationDir -recurse
+if ((Test-Path $DestinationLocation) -ne $True)
+{ 
+    New-Item $DestinationLocation -type directory 
+    write-host "Successfully created folder - $DestinationLocation" -ForegroundColor Green
+}
+else
+{
+    write-host "Folder already exits - $DestinationLocation" -ForegroundColor Blue
+}
+
+$currentDate = Get-Date -format "MM-dd-yyyy-HHmmss"
+if($currentDate -ne $null)
+{
+    $newFolder = $BackupLocation + $currentDate
+    if ((Test-Path $newFolder) -ne $True)
+    {
+        New-Item $newFolder -type directory
+        write-host "Successfully created backup folder-" $newFolder -ForegroundColor Green
+    }
+    if($newFolder -ne $null)
+    {
+        $removeBackupFolder = $newFolder + "\*"
+        Remove-Item $removeBackupFolder -Recurse
+
+        Copy-Item $DestinationLocation -Destination $newFolder -Recurse
+        write-host "Successfully copied files to backup folder-" $newFolder -ForegroundColor Green
+
+        $removeFolder = $DestinationLocation + "*"
+        Remove-Item $removeFolder -Recurse
+        write-host "Successfully removed files from folder--" $DestinationLocation -ForegroundColor Green
+
+        #copy files from source location to destination
+        $sLocation = "SampleSource\"
+        Copy-Item $sLocation -Destination $DestinationLocation -Recurse
+        write-host "Successfully copied files and folders to -" $DestinationLocation -ForegroundColor Green
+    }    
+}
+
+Stop-Transcript
+Echo Finish
