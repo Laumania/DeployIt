@@ -7,7 +7,10 @@ Param([Parameter(Mandatory=$true)]
       $DestinationLocation,
       [Parameter(Mandatory=$true)] 
       [String] 
-      $BackupLocation
+      $BackupLocation,
+      [Parameter(Mandatory=$true)] 
+      [String] 
+      $SourceLocation
 )
 
 function Get-ScriptDirectory
@@ -25,52 +28,52 @@ Start-Transcript $logfile
 if ((Test-Path $BackupLocation) -ne $True)
 { 
     New-Item $BackupLocation -type directory 
-    write-host "Successfully created folder - $BackupLocation" -ForegroundColor Green
+    write-host "Created backup folder: $BackupLocation" -ForegroundColor Green
 }
 else
 {
-    write-host "Folder already exits - $BackupLocation" -ForegroundColor Blue
+    write-host "Folder already exits: $BackupLocation" -ForegroundColor Blue
 }
 
 if ((Test-Path $DestinationLocation) -ne $True)
 { 
     New-Item $DestinationLocation -type directory 
-    write-host "Successfully created folder - $DestinationLocation" -ForegroundColor Green
+    write-host "Created destination folder: $DestinationLocation" -ForegroundColor Green
 }
 else
 {
-    write-host "Folder already exits - $DestinationLocation" -ForegroundColor Blue
+    write-host "Folder already exits: $DestinationLocation" -ForegroundColor Blue
 }
 
 $currentDate = Get-Date -format "HHmmss" #"MMddyyyyHHmmss"
 if($currentDate -ne $null)
 {
-    $newFolder = $BackupLocation + $currentDate
-    if ((Test-Path $newFolder) -ne $True)
+    $actualBackupFolder = "$BackupLocation\$currentDate"
+    if ((Test-Path $actualBackupFolder) -ne $True)
     {
-        New-Item $newFolder -type directory
-        write-host "Successfully created backup folder $newFolder" -ForegroundColor Green
+        New-Item $actualBackupFolder -type directory
+        write-host "Created actual backup folder: $actualBackupFolder" -ForegroundColor Green
     }
-    if($newFolder -ne $null)
-    {
-        $removeBackupFolder = $newFolder + "\*"
-        Remove-Item $removeBackupFolder -Recurse
-        write-host "Successfully deleted all files in destination $removeBackupFolder" -ForegroundColor Green
 
-        $destinationPathFull = $DestinationLocation +"*"
-        $backupPathFull = $newFolder +"\"
+    if($actualBackupFolder -ne $null)
+    {
+        $removeBackupFolder = $actualBackupFolder + "\\*"
+        Remove-Item $removeBackupFolder -Recurse
+        write-host "Deleted all files in destination $removeBackupFolder" -ForegroundColor Green
+
+        $destinationPathFull = $DestinationLocation +"\*"
+        $backupPathFull = $actualBackupFolder +"\\"
         write-host "Start backing up $destinationPathFull --> $backupPathFull" -ForegroundColor Green
         
         Copy-Item $destinationPathFull -Destination $backupPathFull -exclude Backups -Recurse
-        write-host "Successfully copied files to backup folder-" $newFolder -ForegroundColor Green
+        write-host "Successfully copied files to backup folder-" $actualBackupFolder -ForegroundColor Green
 
         $removeFolder = $DestinationLocation + "*"
         Remove-Item $removeFolder -exclude Backups -Recurse
-        write-host "Successfully removed files from folder--" $DestinationLocation -ForegroundColor Green
+        write-host "Successfully removed files from folder: $DestinationLocation" -ForegroundColor Green
 
         #copy files from source location to destination
-        $sLocation = "..\\SampleSource\\"
-        Copy-Item $sLocation -Destination $DestinationLocation -Recurse
+        Copy-Item $SourceLocation -Destination $DestinationLocation -Recurse
         write-host "Successfully copied files and folders to -" $DestinationLocation -ForegroundColor Green
     }    
 }
