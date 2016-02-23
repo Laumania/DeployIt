@@ -42,29 +42,34 @@ else
     write-host "Folder already exits - $DestinationLocation" -ForegroundColor Blue
 }
 
-$currentDate = Get-Date -format "MM-dd-yyyy-HHmmss"
+$currentDate = Get-Date -format "HHmmss" #"MMddyyyyHHmmss"
 if($currentDate -ne $null)
 {
     $newFolder = $BackupLocation + $currentDate
     if ((Test-Path $newFolder) -ne $True)
     {
         New-Item $newFolder -type directory
-        write-host "Successfully created backup folder-" $newFolder -ForegroundColor Green
+        write-host "Successfully created backup folder $newFolder" -ForegroundColor Green
     }
     if($newFolder -ne $null)
     {
         $removeBackupFolder = $newFolder + "\*"
         Remove-Item $removeBackupFolder -Recurse
+        write-host "Successfully deleted all files in destination $removeBackupFolder" -ForegroundColor Green
 
-        Copy-Item $DestinationLocation -Destination $newFolder -Recurse
+        $destinationPathFull = $DestinationLocation +"*"
+        $backupPathFull = $newFolder +"\"
+        write-host "Start backing up $destinationPathFull --> $backupPathFull" -ForegroundColor Green
+        
+        Copy-Item $destinationPathFull -Destination $backupPathFull -exclude Backups -Recurse
         write-host "Successfully copied files to backup folder-" $newFolder -ForegroundColor Green
 
         $removeFolder = $DestinationLocation + "*"
-        Remove-Item $removeFolder -Recurse
+        Remove-Item $removeFolder -exclude Backups -Recurse
         write-host "Successfully removed files from folder--" $DestinationLocation -ForegroundColor Green
 
         #copy files from source location to destination
-        $sLocation = "SampleSource\"
+        $sLocation = "..\\SampleSource\\"
         Copy-Item $sLocation -Destination $DestinationLocation -Recurse
         write-host "Successfully copied files and folders to -" $DestinationLocation -ForegroundColor Green
     }    
