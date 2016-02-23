@@ -1,4 +1,4 @@
-# DeployMe
+# DeployIt
 Often you find your self deploying your .NET web or console applications in the same stupid, manual way.
 The (stupid) process often goes something like this:
 - Manually build/publish your project in Visual Studio (in the right configuration!)
