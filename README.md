@@ -10,3 +10,6 @@ The (stupid) process often goes something like this:
 - Hope you didn't make any mistake in any of the above...
 
 Yes, we should all work with CI etc., but sometimes that's not immediately possible - and this is where the "DeployIt" script templates comes in handy.
+
+## Tools
+Go get PowerGUI
